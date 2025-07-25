@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>VocabBlitz - Bilingual Word Match</title>
+    <link rel="stylesheet" href="vocabblitz.css">
+    <link rel="stylesheet" href="fonts.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+    <header class="main-header">
+        <h1>VocabBlitz</h1>
+        <p>Bilingual Word Match Game</p>
+    </header>
+    <div class="level-select card" id="levelSelect">
+        <h2>Choose Your Level</h2>
+        <div class="glass-radio-group-vertical">
+          <input checked id="glass-a1a2" name="level" type="radio" value="A1-A2" />
+          <label data-color="silver" for="glass-a1a2">
+            <span class="radio-indicator">
+              <span class="checkmark">✓</span>
+            </span>
+            <span class="label-text">A1-A2</span>
+          </label>
+          <input id="glass-b1b2" name="level" type="radio" value="B1-B2" />
+          <label data-color="gold" for="glass-b1b2">
+            <span class="radio-indicator">
+              <span class="checkmark">✓</span>
+            </span>
+            <span class="label-text">B1-B2</span>
+          </label>
+          <input id="glass-c1c2" name="level" type="radio" value="C1-C2" />
+          <label data-color="platinum" for="glass-c1c2">
+            <span class="radio-indicator">
+              <span class="checkmark">✓</span>
+            </span>
+            <span class="label-text">C1-C2</span>
+          </label>
+          <input id="glass-ai" name="level" type="radio" value="AI" />
+          <label data-color="ai" for="glass-ai">
+            <span class="radio-indicator">
+              <span class="checkmark">✓</span>
+            </span>
+            <span class="label-text">Yapay Zeka</span>
+          </label>
+          <div class="glass-glider-vertical"></div>
+        </div>
+        <button class="levelBtn" id="startGame">Start</button>
+    </div>
+    <section class="game-section card" id="gameSection">
+        <div class="game-info">
+            <div class="score-timer">
+                <span>Score: <span id="score">0</span></span>
+                <span>Question: <span id="questionNum">1</span>/10</span>
+                <span>Time: <span id="time">0</span>s
+                  <div class="spinner" id="timerSpinner" style="display:inline-block;vertical-align:middle;width:22px;height:22px;margin-left:4px;">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </span>
+            </div>
+        </div>
+        <div class="word-card">
+            <span id="wordDisplay"></span>
+        </div>
+        <div class="choices" id="choices"></div>
+        <div class="message" id="message"></div>
+    </section>
+    <div class="game-over card" id="gameOver" style="display:none">
+        <h2>Game Over</h2>
+        <p id="finalScore"></p>
+        <div id="wrongSummary"></div>
+        <button class="levelBtn" id="playAgain">Play Again</button>
+    </div>
+    </div>
+    <script src="vocabblitz.js"></script>
+</body>
+</html> 

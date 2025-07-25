@@ -98,6 +98,59 @@ const infoModal = document.getElementById("infoModal");
 const closeInfo = document.getElementById("closeInfo");
 const choicesDiv = document.getElementById("choices");
 
+// --- Oyun Seçme Ekranı Başlangıç Akışı ---
+const gameSelect = document.getElementById("gameSelect");
+const chooseVocabBlitz = document.getElementById("chooseVocabBlitz");
+const chooseSentenceGame = document.getElementById("chooseSentenceGame");
+
+function showGameSelect() {
+  gameSelect.style.display = "flex";
+  levelSelect.style.display = "none";
+  gameSection.style.display = "none";
+  gameOver.style.display = "none";
+  // Eğer sentence game varsa onu da gizle
+  const sentenceGame = document.getElementById("sentenceGameSection");
+  if (sentenceGame) sentenceGame.style.display = "none";
+}
+
+function showVocabBlitz() {
+  gameSelect.style.display = "none";
+  levelSelect.style.display = "flex";
+  gameSection.style.display = "none";
+  gameOver.style.display = "none";
+  const sentenceGame = document.getElementById("sentenceGameSection");
+  if (sentenceGame) sentenceGame.style.display = "none";
+  console.log("VocabBlitz seviye seçimi açıldı");
+}
+
+function showSentenceGame() {
+  gameSelect.style.display = "none";
+  levelSelect.style.display = "none";
+  gameSection.style.display = "none";
+  gameOver.style.display = "none";
+  let sentenceGame = document.getElementById("sentenceGameSection");
+  if (!sentenceGame) {
+    sentenceGame = document.createElement("div");
+    sentenceGame.id = "sentenceGameSection";
+    sentenceGame.className = "card";
+    sentenceGame.innerHTML = `<h2>Cümle Ustası (Yakında)</h2><p>Bu oyun çok yakında aktif olacak!</p>`;
+    document.querySelector(".container").appendChild(sentenceGame);
+  }
+  sentenceGame.style.display = "flex";
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  showGameSelect();
+});
+if (chooseVocabBlitz) {
+  chooseVocabBlitz.onclick = showVocabBlitz;
+}
+if (chooseSentenceGame) {
+  chooseSentenceGame.onclick = function() {
+    window.location.href = "sentence-game.html";
+  };
+}
+
 function shuffle(arr) {
   return arr.sort(() => Math.random() - 0.5);
 }
@@ -110,6 +163,7 @@ function getTimeForLevel(level) {
 }
 
 function startGame(level) {
+  console.log("startGame çağrıldı, seviye:", level);
   currentLevel = level;
   currentWords = shuffle([...wordPools[level]]).slice(0, totalQuestions);
   score = 0;
@@ -289,6 +343,7 @@ if (startGameBtn) {
     const selectedRadio = document.querySelector('.glass-radio-group-vertical input[name="level"]:checked');
     if (selectedRadio) {
       const level = selectedRadio.value;
+      console.log("Başlatılan seviye:", level);
       startGame(level);
     }
   });
@@ -310,3 +365,231 @@ window.onload = () => {
   const spinner = document.getElementById("timerSpinner");
   if (spinner) spinner.style.display = "none";
 };
+
+// --- Cümle Ustası Oyun Akışı ---
+const sentenceGameSection = document.getElementById("sentenceGameSection");
+const sentenceLevelSelect = document.getElementById("sentenceLevelSelect");
+const sentenceGamePlay = document.getElementById("sentenceGamePlay");
+const sentenceGameOver = document.getElementById("sentenceGameOver");
+const sentenceScoreSpan = document.getElementById("sentenceScore");
+const sentenceQuestionNumSpan = document.getElementById("sentenceQuestionNum");
+const sentenceTimeSpan = document.getElementById("sentenceTime");
+const sentenceQuestionDiv = document.getElementById("sentenceQuestion");
+const sentenceChoicesDiv = document.getElementById("sentenceChoices");
+const sentenceFeedbackDiv = document.getElementById("sentenceFeedback");
+const sentenceFinalScore = document.getElementById("sentenceFinalScore");
+const sentencePlayAgain = document.getElementById("sentencePlayAgain");
+const startSentenceGameBtn = document.getElementById("startSentenceGame");
+
+let sentenceGameState = {
+  level: null,
+  questions: [],
+  current: 0,
+  score: 0,
+  correct: 0,
+  wrong: 0,
+  timer: null,
+  time: 0,
+  userAnswers: []
+};
+
+const sentenceQuestionsData = {
+  "A2": [
+    { type: "fill", q: "I ___ a student.", a: "am", choices: ["is", "am", "are", "be"] },
+    { type: "order", q: ["She", "to", "goes", "school", "every", "day"], a: ["She", "goes", "to", "school", "every", "day"] },
+    { type: "verb", q: "He ___ (play) football.", a: "plays", choices: ["play", "plays", "playing", "played"] },
+    { type: "error", q: "She don't like apples.", a: "don't", choices: ["don't", "like", "apples", "No error"] },
+    { type: "fill", q: "They ___ happy.", a: "are", choices: ["is", "am", "are", "be"] },
+    { type: "order", q: ["We", "in", "live", "Ankara"], a: ["We", "live", "in", "Ankara"] },
+    { type: "verb", q: "I ___ (read) a book.", a: "am reading", choices: ["read", "am reading", "reading", "reads"] },
+    { type: "error", q: "He go to work every day.", a: "go", choices: ["go", "to", "work", "No error"] },
+    { type: "fill", q: "It ___ cold today.", a: "is", choices: ["is", "are", "am", "be"] },
+    { type: "order", q: ["My", "name", "is", "Ali"], a: ["My", "name", "is", "Ali"] }
+  ],
+  "B1": [
+    { type: "fill", q: "She ___ to the gym on Mondays.", a: "goes", choices: ["go", "goes", "going", "gone"] },
+    { type: "order", q: ["They", "have", "never", "visited", "Istanbul"], a: ["They", "have", "never", "visited", "Istanbul"] },
+    { type: "verb", q: "We ___ (study) English for two years.", a: "have studied", choices: ["studied", "have studied", "studying", "study"] },
+    { type: "error", q: "He didn't went to the party.", a: "went", choices: ["didn't", "went", "party", "No error"] },
+    { type: "fill", q: "The children ___ playing in the park.", a: "are", choices: ["is", "are", "was", "were"] },
+    { type: "order", q: ["I", "will", "call", "you", "later"], a: ["I", "will", "call", "you", "later"] },
+    { type: "verb", q: "She ___ (not/like) coffee.", a: "doesn't like", choices: ["don't like", "doesn't like", "not like", "isn't like"] },
+    { type: "error", q: "We was at home yesterday.", a: "was", choices: ["was", "at", "home", "No error"] },
+    { type: "fill", q: "My father ___ a doctor.", a: "is", choices: ["is", "are", "am", "be"] },
+    { type: "order", q: ["The", "movie", "was", "very", "interesting"], a: ["The", "movie", "was", "very", "interesting"] }
+  ],
+  "B2-C1": [
+    { type: "fill", q: "If I ___ more time, I would travel.", a: "had", choices: ["have", "had", "has", "having"] },
+    { type: "order", q: ["Despite", "the", "rain", "they", "went", "out"], a: ["Despite", "the", "rain", "they", "went", "out"] },
+    { type: "verb", q: "She ___ (write) three books so far.", a: "has written", choices: ["wrote", "has written", "writes", "writing"] },
+    { type: "error", q: "Neither of the answers are correct.", a: "are", choices: ["Neither", "are", "correct", "No error"] },
+    { type: "fill", q: "He ___ to have finished the project.", a: "claims", choices: ["claim", "claims", "claimed", "claiming"] },
+    { type: "order", q: ["The", "book", "I", "read", "was", "amazing"], a: ["The", "book", "I", "read", "was", "amazing"] },
+    { type: "verb", q: "They ___ (not/see) the film yet.", a: "haven't seen", choices: ["didn't see", "haven't seen", "not see", "don't see"] },
+    { type: "error", q: "He don't know the answer.", a: "don't", choices: ["don't", "know", "answer", "No error"] },
+    { type: "fill", q: "The results ___ announced tomorrow.", a: "will be", choices: ["will", "will be", "are", "is"] },
+    { type: "order", q: ["She", "has", "been", "working", "here", "since", "2015"], a: ["She", "has", "been", "working", "here", "since", "2015"] }
+  ]
+};
+
+function shuffleArray(arr) {
+  return arr.map(x => [Math.random(), x]).sort().map(x => x[1]);
+}
+
+function startSentenceGameFlow(level) {
+  sentenceGameState.level = level;
+  sentenceGameState.questions = [];
+  sentenceGameState.current = 0;
+  sentenceGameState.score = 0;
+  sentenceGameState.correct = 0;
+  sentenceGameState.wrong = 0;
+  sentenceGameState.userAnswers = [];
+  sentenceGameState.time = 0;
+  clearInterval(sentenceGameState.timer);
+  // AI Modu ise placeholder göster
+  if (level === "AI") {
+    sentenceLevelSelect.style.display = "none";
+    sentenceGamePlay.style.display = "none";
+    sentenceGameOver.style.display = "flex";
+    sentenceFinalScore.innerHTML = "AI Modu çok yakında!";
+    return;
+  }
+  // Soruları seç
+  let pool = sentenceQuestionsData[level] || sentenceQuestionsData["A2"];
+  sentenceGameState.questions = shuffleArray(pool).slice(0, 10);
+  sentenceLevelSelect.style.display = "none";
+  sentenceGamePlay.style.display = "flex";
+  sentenceGameOver.style.display = "none";
+  nextSentenceQuestion();
+  // Zamanlayıcı başlat
+  sentenceGameState.time = 0;
+  sentenceTimeSpan.textContent = sentenceGameState.time;
+  sentenceGameState.timer = setInterval(() => {
+    sentenceGameState.time++;
+    sentenceTimeSpan.textContent = sentenceGameState.time;
+  }, 1000);
+}
+
+function nextSentenceQuestion() {
+  if (sentenceGameState.current >= sentenceGameState.questions.length) {
+    endSentenceGame();
+    return;
+  }
+  const qObj = sentenceGameState.questions[sentenceGameState.current];
+  sentenceQuestionNumSpan.textContent = sentenceGameState.current + 1;
+  sentenceScoreSpan.textContent = sentenceGameState.score;
+  sentenceFeedbackDiv.textContent = "";
+  // Soru tipine göre render
+  if (qObj.type === "fill" || qObj.type === "verb" || qObj.type === "error") {
+    sentenceQuestionDiv.innerHTML = qObj.q;
+    sentenceChoicesDiv.innerHTML = "";
+    qObj.choices.forEach((choice, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "sentence-choice-btn";
+      btn.textContent = choice;
+      btn.onclick = () => selectSentenceChoice(choice);
+      sentenceChoicesDiv.appendChild(btn);
+    });
+  } else if (qObj.type === "order") {
+    sentenceQuestionDiv.innerHTML = "Kelimeleri doğru sıraya dizin:";
+    sentenceChoicesDiv.innerHTML = "";
+    // Karışık sırada göster
+    let mixed = shuffleArray(qObj.q);
+    mixed.forEach((word, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "sentence-choice-btn";
+      btn.textContent = word;
+      btn.onclick = () => selectOrderWord(word, btn);
+      sentenceChoicesDiv.appendChild(btn);
+    });
+    // Kullanıcının seçtiği sıralama
+    sentenceGameState.orderAnswer = [];
+  }
+}
+
+function selectSentenceChoice(choice) {
+  const qObj = sentenceGameState.questions[sentenceGameState.current];
+  let correct = false;
+  if (qObj.a === choice) {
+    correct = true;
+    sentenceGameState.score += 10;
+    sentenceGameState.correct++;
+    sentenceFeedbackDiv.textContent = "Doğru!";
+    sentenceFeedbackDiv.style.color = "#388e3c";
+  } else {
+    sentenceGameState.score -= 2;
+    sentenceGameState.wrong++;
+    sentenceFeedbackDiv.textContent = `Yanlış! Doğru cevap: ${qObj.a}`;
+    sentenceFeedbackDiv.style.color = "#d32f2f";
+  }
+  sentenceGameState.userAnswers.push({q: qObj, user: choice, correct});
+  setTimeout(() => {
+    sentenceGameState.current++;
+    nextSentenceQuestion();
+  }, 900);
+}
+
+function selectOrderWord(word, btn) {
+  if (!btn.disabled) {
+    btn.disabled = true;
+    btn.style.opacity = 0.6;
+    sentenceGameState.orderAnswer.push(word);
+    // Cevap tamamlandıysa kontrol et
+    const qObj = sentenceGameState.questions[sentenceGameState.current];
+    if (sentenceGameState.orderAnswer.length === qObj.a.length) {
+      let correct = JSON.stringify(sentenceGameState.orderAnswer) === JSON.stringify(qObj.a);
+      if (correct) {
+        sentenceGameState.score += 10;
+        sentenceGameState.correct++;
+        sentenceFeedbackDiv.textContent = "Doğru!";
+        sentenceFeedbackDiv.style.color = "#388e3c";
+      } else {
+        sentenceGameState.score -= 2;
+        sentenceGameState.wrong++;
+        sentenceFeedbackDiv.textContent = `Yanlış! Doğru sıra: ${qObj.a.join(" ")}`;
+        sentenceFeedbackDiv.style.color = "#d32f2f";
+      }
+      sentenceGameState.userAnswers.push({q: qObj, user: [...sentenceGameState.orderAnswer], correct});
+      setTimeout(() => {
+        sentenceGameState.current++;
+        nextSentenceQuestion();
+      }, 1200);
+    }
+  }
+}
+
+function endSentenceGame() {
+  clearInterval(sentenceGameState.timer);
+  sentenceGamePlay.style.display = "none";
+  sentenceGameOver.style.display = "flex";
+  let accuracy = Math.round((sentenceGameState.correct / sentenceGameState.questions.length) * 100);
+  sentenceFinalScore.innerHTML = `Doğru: <b>${sentenceGameState.correct}</b> / Yanlış: <b>${sentenceGameState.wrong}</b><br>Skor: <b>${sentenceGameState.score}</b><br>Doğruluk: <b>${accuracy}%</b>`;
+}
+
+if (startSentenceGameBtn) {
+  startSentenceGameBtn.onclick = function() {
+    // Seçili radio inputu bul
+    const selectedRadio = document.querySelector('.sentence-level-select input[name="sentenceLevel"]:checked');
+    if (selectedRadio) {
+      startSentenceGameFlow(selectedRadio.value);
+    }
+  };
+}
+if (sentencePlayAgain) {
+  sentencePlayAgain.onclick = function() {
+    sentenceLevelSelect.style.display = "flex";
+    sentenceGamePlay.style.display = "none";
+    sentenceGameOver.style.display = "none";
+  };
+}
+// --- Oyun seçme ekranı ile entegrasyon ---
+function showSentenceGame() {
+  gameSelect.style.display = "none";
+  levelSelect.style.display = "none";
+  gameSection.style.display = "none";
+  gameOver.style.display = "none";
+  sentenceGameSection.style.display = "flex";
+  sentenceLevelSelect.style.display = "flex";
+  sentenceGamePlay.style.display = "none";
+  sentenceGameOver.style.display = "none";
+}

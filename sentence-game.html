@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cümle Ustası - Sentence Master</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="fonts.css">
+    <link rel="stylesheet" href="sentence-game.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <header class="main-header">
+    <h1>Cümle Ustası</h1>
+    <p>Cümle Tabanlı İngilizce Oyun</p>
+  </header>
+  <main>
+    <section class="card" id="sentenceGameSection">
+      <div id="sentenceLevelSelect">
+        <div class="level-title">Choose Your Level</div>
+        <div class="glass-radio-group-vertical">
+          <input checked id="glass-a1a2" name="sentenceLevel" type="radio" value="A1-A2" />
+          <label data-color="silver" for="glass-a1a2">
+            <span class="radio-indicator"><span class="checkmark">✓</span></span>
+            <span class="label-text">A1-A2</span>
+          </label>
+          <input id="glass-b1b2" name="sentenceLevel" type="radio" value="B1-B2" />
+          <label data-color="gold" for="glass-b1b2">
+            <span class="radio-indicator"><span class="checkmark">✓</span></span>
+            <span class="label-text">B1-B2</span>
+          </label>
+          <input id="glass-c1c2" name="sentenceLevel" type="radio" value="C1-C2" />
+          <label data-color="platinum" for="glass-c1c2">
+            <span class="radio-indicator"><span class="checkmark">✓</span></span>
+            <span class="label-text">C1-C2</span>
+          </label>
+          <input id="glass-ai" name="sentenceLevel" type="radio" value="AI" />
+          <label data-color="ai" for="glass-ai">
+            <span class="radio-indicator"><span class="checkmark">✓</span></span>
+            <span class="label-text">Yapay Zeka</span>
+          </label>
+          <div class="glass-glider-vertical"></div>
+        </div>
+        <button class="levelBtn" id="startSentenceGame">Başla</button>
+      </div>
+      <div class="sentence-game-play" id="sentenceGamePlay" style="display:none">
+        <div class="sentence-game-info">
+          <span>Skor: <span id="sentenceScore">0</span></span>
+          <span>Soru: <span id="sentenceQuestionNum">1</span>/10</span>
+          <span>Zaman: <span id="sentenceTime">0</span>s</span>
+        </div>
+        <div class="sentence-instruction" id="sentenceInstruction"></div>
+        <div class="sentence-question" id="sentenceQuestion"></div>
+        <div class="sentence-choices" id="sentenceChoices"></div>
+        <div class="sentence-feedback" id="sentenceFeedback"></div>
+      </div>
+      <div class="sentence-game-over" id="sentenceGameOver" style="display:none">
+        <h2>Oyun Bitti</h2>
+        <p id="sentenceFinalScore"></p>
+        <div id="sentenceSummary" class="sentence-summary"></div>
+       <button class="game-option-btn" onclick="window.location.href='sentence-game.html'">
+        <span><small>Tekrar Oyna</small></span>
+      </div>
+    </section>
+  </main>
+  <script src="sentence-game.js"></script>
+</body>
+</html> 
